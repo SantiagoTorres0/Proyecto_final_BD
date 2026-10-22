@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Curso - PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "curso",
+      "Username": "curso",
+      "SSLMode": "prefer",
+      "Comment": "Contenedor 'postgres' del docker-compose del curso. La primera vez pgAdmin pedirá la contraseña (por defecto: curso) y luego la recuerda."
+    }
+  }
+}
