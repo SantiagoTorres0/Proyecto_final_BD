@@ -132,3 +132,4 @@ Desde dentro del contenedor, el host de la base es `postgres` (nombre del
 servicio), no `localhost`. Con la librería `pg`, `new Pool()` sin
 argumentos ya funciona: toma host/usuario/clave/base de las variables de
 entorno que el `docker-compose.yml` le pasa al contenedor `node`.
+# Proyecto_final_BD
