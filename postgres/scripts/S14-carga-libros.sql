@@ -41,8 +41,8 @@ UPDATE stg_libro SET motivo = CASE
     WHEN ejemplares_disponibles !~ '^-?[0-9]{1,6}$'
                                                   THEN 'ejemplares no numérico'
 WHEN ejemplares_disponibles::integer < 0      THEN 'ejemplares negativo'
-    WHEN EXISTS (SELECT 1 FROM libro l WHERE l.isbn = stg_libro.isbn)
-                                                  THEN 'isbn ya existe en el catálogo'
+    WHEN EXISTS (SELECT 1 FROM libro l WHERE l.codigo = (right(stg_libro.isbn, 9))::integer)
+                                              THEN 'código ya existe en el catálogo'
 END;
 
 -- 4. Detectar duplicados dentro del mismo archivo
@@ -56,9 +56,14 @@ WHERE motivo IS NULL
                 AND s2.linea_csv < stg_libro.linea_csv);
 
 -- 5. Pasar las filas válidas a la tabla final
-INSERT INTO libro (isbn, titulo, autor, categoria, anio_publicacion, ejemplares_disponibles)
-SELECT isbn, titulo, autor, categoria,
-       anio_publicacion::smallint, ejemplares_disponibles::integer
+INSERT INTO libro (codigo, autor, titulo, edicion, genero, editorial)
+SELECT 
+    (right(isbn, 9))::integer AS codigo,
+    autor,
+    titulo,
+    '1ra Edición'              AS edicion,   -- Valor por defecto si no viene en el CSV
+    categoria                 AS genero,    -- Mapeamos la categoría del CSV al género de tu tabla
+    'Editorial General'       AS editorial  -- Valor por defecto si no viene en el CSV
 FROM stg_libro
 WHERE motivo IS NULL;
 
