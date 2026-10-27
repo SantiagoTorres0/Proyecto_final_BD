@@ -14,7 +14,7 @@ CREATE TYPE tipo_perfil AS ENUM (
 
 -- Tablas base de tu modelo
 CREATE TABLE lector (
-  id_lector integer PRIMARY KEY,
+  documento integer PRIMARY KEY,
   id_cuenta integer UNIQUE NOT NULL,
   nombre varchar NOT NULL,
   correo varchar UNIQUE,
@@ -73,52 +73,15 @@ CREATE TABLE creado_por (
 );
 
 -- Foreign keys de tu modelo
-ALTER TABLE cuenta_usuario ADD FOREIGN KEY (id_cuenta) REFERENCES lector (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE prestamo ADD FOREIGN KEY (id_lector) REFERENCES lector (id_lector) DEFERRABLE INITIALLY IMMEDIATE;
+-- Foreign keys corregidas del modelo
+ALTER TABLE lector ADD FOREIGN KEY (id_cuenta) REFERENCES cuenta_usuario (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE bibliotecario ADD FOREIGN KEY (id_cuenta) REFERENCES cuenta_usuario (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE prestamo ADD FOREIGN KEY (id_lector) REFERENCES lector (documento) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE prestamo ADD FOREIGN KEY (codigo) REFERENCES unidad (codigo_unit) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE prestamo ADD FOREIGN KEY (id_empleado) REFERENCES bibliotecario (id_empleado) DEFERRABLE INITIALLY IMMEDIATE;
+
 ALTER TABLE unidad ADD FOREIGN KEY (codigo_libro) REFERENCES libro (codigo) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE cuenta_usuario ADD FOREIGN KEY (id_cuenta) REFERENCES bibliotecario (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;
+
 ALTER TABLE creado_por ADD FOREIGN KEY (id_empleado) REFERENCES bibliotecario (id_empleado) DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE cuenta_usuario ADD FOREIGN KEY (id_cuenta) REFERENCES creado_por (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;
-
--- Bitácora para el laboratorio S14
-CREATE TABLE rechazo_carga (
-  id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  archivo text NOT NULL,
-  linea integer NOT NULL,
-  contenido text NOT NULL,
-  motivo text NOT NULL,
-  fecha timestamptz NOT NULL DEFAULT now()
-);
-
--- Tablas de paso (staging)
-CREATE TABLE stg_linea (
-  n integer GENERATED ALWAYS AS IDENTITY,
-  linea text
-);
-
-CREATE TABLE stg_libro (
-  linea_csv integer,
-  contenido text,
-  num_campos integer,
-  isbn text,
-  titulo text,
-  autor text,
-  categoria text,
-  anio_publicacion text,
-  ejemplares_disponibles text,
-  motivo text
-);
-
-CREATE TABLE stg_lector (
-  linea_csv integer,
-  contenido text,
-  num_campos integer,
-  documento text,
-  nombres text,
-  apellidos text,
-  correo text,
-  telefono text,
-  motivo text
-);
+ALTER TABLE creado_por ADD FOREIGN KEY (id_cuenta) REFERENCES cuenta_usuario (id_cuenta) DEFERRABLE INITIALLY IMMEDIATE;

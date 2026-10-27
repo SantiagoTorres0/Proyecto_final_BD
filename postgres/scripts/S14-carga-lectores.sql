@@ -37,10 +37,10 @@ UPDATE stg_lector SET motivo = CASE
     WHEN correo = ''                              THEN 'correo vacío'
     WHEN correo !~ '^[^@ ]+@[^@ ]+\.[^@ ]+$'      THEN 'correo mal formado'
     WHEN telefono !~ '^[0-9]{7,15}$'              THEN 'teléfono no numérico o de longitud inválida'
-    WHEN EXISTS (SELECT 1 FROM biblioteca.lector l WHERE l.documento = stg_lector.documento)
-                                                  THEN 'documento ya existe'
+    WHEN EXISTS (SELECT 1 FROM biblioteca.lector l WHERE l.documento = stg_lector.documento::integer)
+                                              THEN 'documento ya existe en el sistema'
     WHEN EXISTS (SELECT 1 FROM biblioteca.lector l WHERE l.correo = stg_lector.correo)
-                                                  THEN 'correo ya registrado por otro lector'
+                                              THEN 'correo ya existe en el sistema'
 END;
 
 -- 4. Duplicados dentro del mismo archivo
@@ -51,9 +51,24 @@ WHERE motivo IS NULL
                 AND s2.motivo IS NULL
                 AND s2.linea_csv < stg_lector.linea_csv);
 
--- 5. Filas válidas a la tabla final
-INSERT INTO biblioteca.lector (documento, nombres, apellidos, correo, telefono)
-SELECT documento, nombres, apellidos, correo, telefono
+-- 5a. Crear primero la cuenta de usuario padre
+INSERT INTO biblioteca.cuenta_usuario (id_cuenta, perfil, login_nombre, login_contrasena)
+SELECT 
+    linea_csv AS id_cuenta,
+    'lector'::tipo_perfil AS perfil,
+    correo AS login_nombre,
+    '123456' AS login_contrasena
+FROM stg_lector
+WHERE motivo IS NULL;
+
+-- 5b. Insertar los lectores referenciando a su cuenta
+INSERT INTO biblioteca.lector (documento, id_cuenta, nombre, correo, telefono)
+SELECT 
+    documento::integer AS documento,
+    linea_csv AS id_cuenta,
+    nombres || ' ' || apellidos AS nombre,
+    correo,
+    telefono
 FROM stg_lector
 WHERE motivo IS NULL;
 
