@@ -40,7 +40,7 @@ UPDATE stg_libro SET motivo = CASE
                                                   THEN 'año fuera de rango'
     WHEN ejemplares_disponibles !~ '^-?[0-9]{1,6}$'
                                                   THEN 'ejemplares no numérico'
---WHEN ejemplares_disponibles::integer < 0      THEN 'ejemplares negativo'
+WHEN ejemplares_disponibles::integer < 0      THEN 'ejemplares negativo'
     WHEN EXISTS (SELECT 1 FROM libro l WHERE l.isbn = stg_libro.isbn)
                                                   THEN 'isbn ya existe en el catálogo'
 END;
