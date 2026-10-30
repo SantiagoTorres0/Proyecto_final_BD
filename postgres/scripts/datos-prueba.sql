@@ -18,6 +18,7 @@
 --   3. bibliotecarios  (cuenta_usuario + bibliotecario)    ids de cuenta 21..25
 --   4. unidades        (unidad)            necesita libros
 --   5. préstamos       (prestamo)          necesita lectores, bibliotecarios, unidades
+--   6. devoluciones    (fecha_devolucion)    necesita préstamos
 --
 -- Cada paso es su propio script S14-carga-*.sql con su propia transacción:
 -- si uno falla por error de SQL, los anteriores quedan confirmados y los
@@ -64,6 +65,11 @@
 \echo '>> 5/5 Préstamos'
 \set archivo :dir/prestamo.csv
 \ir S14-carga-prestamos.sql
+
+\echo
+\echo '>> 6/6 Devoluciones'
+\set archivo :dir/devoluciones.csv
+\ir S14-carga-devoluciones.sql
 
 -- -----------------------------------------------------------------------------
 -- Resumen de control
