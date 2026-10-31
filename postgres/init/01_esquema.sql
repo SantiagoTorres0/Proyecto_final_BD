@@ -105,7 +105,7 @@ ALTER TABLE unidad ADD FOREIGN KEY (codigo_libro) REFERENCES libro (codigo) DEFE
 CREATE TABLE prestamo (
   id_prestamo    integer PRIMARY KEY,
   fecha_prestamo date    NOT NULL,
-  fecha_devolucion date,  -- puede ser NULL si el libro esta en estado prestamo o mora              
+  fecha_devolucion date,  -- Es NULL si el libro esta en estado prestamo o mora, o sea, no se ha devuelto todavía.              
   codigo_libro   integer NOT NULL,
   id_lector      bigint  NOT NULL,
   codigo         varchar NOT NULL,                       -- unidad.codigo_unit
