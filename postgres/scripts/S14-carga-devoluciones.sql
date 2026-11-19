@@ -18,6 +18,10 @@
 --   devolución anterior al préstamo · id_prestamo repetido en el archivo.
 --
 -- Los préstamos que no aparecen en el CSV quedan abiertos (fecha_devolucion NULL).
+--
+-- ESQUEMA NORMALIZADO: al terminar se verifica que ninguna unidad quede con más
+-- de un préstamo abierto (ya no existe la columna unidad.disponibilidad que lo
+-- delataba). Si la consulta final devuelve filas, faltan devoluciones en el CSV.
 -- Staging en una tabla temporal: no requiere cambios en el esquema.
 -- =============================================================================
 
@@ -107,3 +111,13 @@ WHERE motivo IS NOT NULL
 ORDER BY linea_csv;
 
 DROP TABLE pg_temp.tmp_devolucion;
+
+-- Verificación de consistencia: una unidad no puede tener 2+ préstamos abiertos.
+-- Debe devolver CERO filas.
+SELECT codigo AS unidad_con_varios_prestamos_abiertos,
+       count(*) AS abiertos,
+       string_agg(id_prestamo::text, ', ' ORDER BY id_prestamo) AS prestamos
+FROM prestamo
+WHERE fecha_devolucion IS NULL
+GROUP BY codigo
+HAVING count(*) > 1;
