@@ -8,7 +8,7 @@
 services:
   postgres:
     image: postgres:16
-    container_name: curso_postgres
+    container_name: biblioteca_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-curso}
@@ -35,7 +35,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:8
-    container_name: curso_pgadmin
+    container_name: biblioteca_pgadmin
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-estudiante@curso.edu.co}
@@ -59,7 +59,7 @@ services:
 
   node:
     image: node:20-alpine
-    container_name: curso_node
+    container_name: biblioteca_node
     restart: unless-stopped
     working_dir: /usr/src/app
     environment:

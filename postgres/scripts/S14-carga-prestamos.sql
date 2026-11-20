@@ -23,12 +23,18 @@
 --   bibliotecario o unidad inexistentes · la unidad no es de ese libro ·
 --   id_prestamo repetido en el archivo.
 --
+-- ESQUEMA NORMALIZADO: prestamo ya no tiene la columna codigo_libro (el libro se
+-- obtiene por JOIN con unidad). La columna codigo_libro del CSV se usa SOLO para
+-- validar que la unidad pertenezca a ese libro; no se inserta.
+--
 -- Nota de negocio: NO se exige que la unidad figure como no disponible. En los
 -- datos semilla solo 4 de 20 préstamos están "abiertos" (U-003-1, U-005-2,
 -- U-008-1, U-010-2); los demás son históricos y no tienen fecha de devolución
 -- en el CSV, así que no se puede inferir cuáles siguen pendientes.
 --
--- Ejecutar DESPUÉS de libros, lectores, bibliotecarios y unidades.
+-- Ejecutar DESPUÉS de libros, lectores, bibliotecarios y unidades, y ANTES de
+-- S14-carga-devoluciones.sql (este CSV no trae fecha_devolucion: hasta aplicar
+-- las devoluciones, todos los préstamos quedan abiertos).
 -- =============================================================================
 
 \set ON_ERROR_STOP on
@@ -94,8 +100,8 @@ WHERE motivo IS NULL
                 AND s2.linea_csv < stg_prestamo.linea_csv);
 
 -- 5. Filas válidas -> prestamo
-INSERT INTO prestamo (id_prestamo, fecha_prestamo, codigo_libro, id_lector, codigo, id_empleado)
-SELECT id_prestamo::integer, fecha_prestamo::date, codigo_libro::integer,
+INSERT INTO prestamo (id_prestamo, fecha_prestamo, id_lector, codigo, id_empleado)
+SELECT id_prestamo::integer, fecha_prestamo::date,
        id_lector::bigint, codigo, id_empleado::integer
 FROM stg_prestamo
 WHERE motivo IS NULL

@@ -22,6 +22,11 @@
 -- Nomenclatura: codigo_unit = 'U-LLL-N' (LLL = libro, N = ejemplar) y el LLL
 -- debe coincidir con la columna codigo_libro.
 --
+-- ESQUEMA NORMALIZADO: unidad solo guarda (codigo_unit, codigo_libro).
+-- `disponibilidad` y `estado` (mora) del CSV se siguen VALIDANDO (formato true/
+-- false y la regla "disponible no puede estar en mora") pero YA NO SE GUARDAN:
+-- son datos derivados de prestamo y se calculan en la vista v_unidad.
+--
 -- Reglas de rechazo (primera que falle):
 --   columnas <> 4 · libro vacío / no entero · unidad vacía o con formato
 --   distinto de U-LLL-N · número de libro del código <> codigo_libro ·
@@ -86,9 +91,9 @@ WHERE motivo IS NULL
                 AND s2.motivo IS NULL
                 AND s2.linea_csv < stg_unidad.linea_csv);
 
--- 5. Filas válidas -> unidad (`codigo` lo genera la IDENTITY)
-INSERT INTO unidad (codigo_libro, codigo_unit, disponibilidad, estado)
-SELECT codigo_libro::integer, codigo_unit, disponibilidad::boolean, estado::boolean
+-- 5. Filas válidas -> unidad (solo clave y libro; disponibilidad/estado se derivan)
+INSERT INTO unidad (codigo_unit, codigo_libro)
+SELECT codigo_unit, codigo_libro::integer
 FROM stg_unidad
 WHERE motivo IS NULL
 ORDER BY linea_csv;
